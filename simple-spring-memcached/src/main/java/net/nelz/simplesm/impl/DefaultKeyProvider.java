@@ -75,7 +75,7 @@ public class DefaultKeyProvider implements KeyProvider {
                             method.toString(),
                             CacheKeyMethod.class.getName()));
                 }
-                if (!String.class.equals(method.getReturnType())) {
+                if (!isSupportReturnType(method)) {
                     throw new InvalidAnnotationException(String.format(
                             "Method [%s] must return a String to be annotated with [%s]",
                             method.toString(),
@@ -102,8 +102,13 @@ public class DefaultKeyProvider implements KeyProvider {
         return targetMethod;
     }
 
+    private boolean isSupportReturnType(Method method) {
+        return String.class.equals(method.getReturnType()) || Long.class.equals(method.getReturnType())
+                || Integer.class.equals(method.getReturnType());
+    }
+
     String generateObjectId(final Method keyMethod, final Object keyObject) throws Exception {
-        final String objectId = (String) keyMethod.invoke(keyObject, null);
+        final String objectId = String.valueOf(keyMethod.invoke(keyObject, null));
         if (objectId == null || objectId.length() < 1) {
             throw new RuntimeException("Got an empty key value from " + keyMethod.getName());
         }
